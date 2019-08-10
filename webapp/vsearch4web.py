@@ -7,7 +7,7 @@ def log_request(req: 'flask_request', res: str) -> None:
     dbconfig = {
         'host': '127.0.0.1',
         'user': 'postgres',
-        'password': 'ZiWm9hXK',
+        'password': '***',
         'database': 'vsearchlogdb',
         'port': '5432',
     }

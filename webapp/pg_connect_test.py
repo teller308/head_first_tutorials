@@ -4,7 +4,7 @@ import psycopg2
 dbconfig = {
     'host': '127.0.0.1',
     'user': 'postgres',
-    'password': 'ZiWm9hXK',
+    'password': '***',
     'database': 'vsearchlogdb',
     'port': '5432',
 }
