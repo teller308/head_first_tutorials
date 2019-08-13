@@ -15,15 +15,8 @@ try:
     connection = psycopg2.connect(**dbconfig)
     cursor = connection.cursor()
 
-    # _SQL = """select version();"""
-    _SQL = """select * from log;"""
+    _SQL = """select version();"""
     cursor.execute(_SQL)
-
-    # _SQL = """insert into log
-            #   (phrase, letters, ip, browser_string, results)
-            #   values
-            #   (%s, %s, %s, %s, %s)"""
-    # cursor.execute(_SQL, ('hitch-hiker', 'aeiou', '127.0.0.1', 'Firefox', "{'e','i'}"))
 
     record = cursor.fetchall()
     for row in record:
