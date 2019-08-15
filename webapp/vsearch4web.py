@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, escape
+from flask import Flask, render_template, request, escape, session
 from DBcm import UseDatabase
+from checker import check_logged_in
 
 
 app = Flask(__name__)
+app.secret_key = 'AwesomeKey1'
 app.config['dbconfig'] = {'host': '127.0.0.1',
                           'user': 'postgres',
                           'password': '***',
@@ -47,6 +49,7 @@ def entry_page() -> 'html':
 
 
 @app.route('/viewlog')
+@check_logged_in
 def viewlog() -> 'html':
     
     with UseDatabase(app.config['dbconfig']) as cursor:
@@ -59,6 +62,20 @@ def viewlog() -> 'html':
                            the_title='View log',
                            the_row_titles=titles,
                            the_data=contents,)
+
+
+@app.route('/login')
+def do_login() -> str:
+    session['logged_in'] = True
+    return 'You are now logged in.'
+
+
+@app.route('/logout')
+def do_logout() -> str:
+    if 'logged_in' in  session:
+        session.pop('logged_in')
+        return 'You are now logged out.'    
+    return 'You are NOT logged in.'
 
 
 if __name__ == '__main__':
