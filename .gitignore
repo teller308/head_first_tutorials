@@ -1,14 +1,5 @@
 mymodules/__pycache__/vsearch.cpython-36-pytest-5.0.1.pyc
 Pipfile.lock
-dunder.py
-flask_start.py
-list_copy.py
-list_on_tap2.py
-list_slices1.py
-marvin.py
-mystery.py
-panic.py
-vovels6.py
 vsearch.log
 .idea/head_first_tutorials.iml
 .idea/misc.xml
@@ -22,4 +13,3 @@ files/todos.txt
 mymodules/vsearch.py
 mymodules/__pycache__/vsearch.cpython-36.pyc
 webapp/.vscode/settings.json
-countfromby.py
