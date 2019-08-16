@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, escape, session
-from DBcm import UseDatabase
+from DBcm import UseDatabase, ConnectionError
 from checker import check_logged_in
 
 
@@ -33,7 +33,10 @@ def do_search() -> 'html':
     letters = request.form['letters']
     title = 'Here are your results:'
     results = str(search4letters(phrase, letters))
-    log_request(request, results)
+    try:
+        log_request(request, results)
+    except Exception as err:
+        print('***** Logging failed with: ', str(err))
     return render_template('results.html',
                            the_title=title,
                            the_phrase=phrase,
@@ -52,16 +55,21 @@ def entry_page() -> 'html':
 @check_logged_in
 def viewlog() -> 'html':
     
-    with UseDatabase(app.config['dbconfig']) as cursor:
-        _SQL = "select phrase, letters, ip, browser_string, results from log;"
-        cursor.execute(_SQL)
-        contents = cursor.fetchall()
+    contents = []
+    try:
+        with UseDatabase(app.config['dbconfig']) as cursor:
+                _SQL = "select phrase, letters, ip, browser_string, results from log;"
+                cursor.execute(_SQL)
+                contents = cursor.fetchall()
 
-    titles = ('Phrase', 'Letters', 'Remote_addr', 'User_agent', 'Results')
-    return render_template('viewlog.html',
-                           the_title='View log',
-                           the_row_titles=titles,
-                           the_data=contents,)
+                titles = ('Phrase', 'Letters', 'Remote_addr', 'User_agent', 'Results')
+                return render_template('viewlog.html',
+                                        the_title='View log',
+                                        the_row_titles=titles,
+                                        the_data=contents,)
+    except ConnectionError as err:
+        print('Something went wrong:', err)
+    return 'Error'
 
 
 @app.route('/login')
