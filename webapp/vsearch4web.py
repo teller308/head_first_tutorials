@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, escape, session
+from flask import Flask, render_template, request, escape, session, copy_current_request_context
 from DBcm import UseDatabase, ConnectionError
 from checker import check_logged_in
+from threading import Thread
 
 
 app = Flask(__name__)
@@ -12,14 +13,6 @@ app.config['dbconfig'] = {'host': '127.0.0.1',
                           'port': '5432', }
 
 
-def log_request(req: 'flask_request', res: str) -> None:
-
-    with UseDatabase(app.config['dbconfig']) as cursor:
-        _SQL = """insert into log
-                (phrase, letters, ip, browser_string, results)
-                values
-                (%s, %s, %s, %s, %s)"""
-        cursor.execute(_SQL, (req.form['phrase'], req.form['letters'], req.remote_addr, req.user_agent.browser, res))
 
 
 def search4letters(phrase: str, chars: str) -> set:
@@ -29,12 +22,23 @@ def search4letters(phrase: str, chars: str) -> set:
 
 @app.route('/search4', methods=['POST'])
 def do_search() -> 'html':
+
+    @copy_current_request_context
+    def log_request(req: 'flask_request', res: str) -> None:
+        with UseDatabase(app.config['dbconfig']) as cursor:
+            _SQL = """insert into log
+                    (phrase, letters, ip, browser_string, results)
+                    values
+                    (%s, %s, %s, %s, %s)"""
+            cursor.execute(_SQL, (req.form['phrase'], req.form['letters'], req.remote_addr, req.user_agent.browser, res))
+
     phrase = request.form['phrase']
     letters = request.form['letters']
     title = 'Here are your results:'
     results = str(search4letters(phrase, letters))
     try:
-        log_request(request, results)
+        thread_log_write = Thread(target=log_request, args=(request, results))
+        thread_log_write.start()
     except Exception as err:
         print('***** Logging failed with: ', str(err))
     return render_template('results.html',
